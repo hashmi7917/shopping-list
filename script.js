@@ -4,27 +4,41 @@ const itemList = document.getElementById('item-list');
 const clearBtn = document.getElementById('clear');
 const itemFilter = document.getElementById('filter');
 
-const addItem = (e) => {
-  e.preventDefault();
-  const newItem = itemInput.value;
+const displayItems = () => {
+  const itemsFromStorage = getItemsFromStorage();
+  itemsFromStorage.forEach((item) => addItemToDom(item));
+  checkUI();
+};
 
+const onAddItemSubmit = (e) => {
+  e.preventDefault();
+
+  const newItem = itemInput.value;
   // validate input
   if (newItem === '') {
     alert('Please add an item');
     return;
   }
+  // create item dom element
+  addItemToDom(newItem);
 
-  // Create List item
-  const li = document.createElement('li');
-  li.appendChild(document.createTextNode(newItem));
-  const button = createButton('remove-item btn-link text-red');
-  li.appendChild(button);
-  // Add Li to DOOM
-  itemList.appendChild(li);
+  // add item to local storage
+  addItemToStorage(newItem);
 
   checkUI();
 
   itemInput.value = '';
+};
+
+const addItemToDom = (item) => {
+  // Create List item
+  const li = document.createElement('li');
+  li.appendChild(document.createTextNode(item));
+
+  const button = createButton('remove-item btn-link text-red');
+  li.appendChild(button);
+  // Add Li to DOM
+  itemList.appendChild(li);
 };
 
 const createButton = (classes) => {
@@ -39,6 +53,26 @@ const createIcon = (classes) => {
   const icon = document.createElement('i');
   icon.className = classes;
   return icon;
+};
+
+const addItemToStorage = (item) => {
+  let itemsFromStorage = getItemsFromStorage();
+
+  itemsFromStorage.push(item);
+  // convert to json string and set ot localstoarage
+  localStorage.setItem('items', JSON.stringify(itemsFromStorage));
+};
+
+const getItemsFromStorage = () => {
+  let itemsFromStorage;
+
+  if (localStorage.getItem('items') === null) {
+    itemsFromStorage = [];
+  } else {
+    itemsFromStorage = JSON.parse(localStorage.getItem('items'));
+  }
+
+  return itemsFromStorage;
 };
 
 const removeItems = (e) => {
@@ -86,11 +120,16 @@ const checkUI = () => {
   }
 };
 
-// Event Listerner
-// Add Items in List
-itemForm.addEventListener('submit', addItem);
-itemList.addEventListener('click', removeItems);
-clearBtn.addEventListener('click', clearItems);
-itemFilter.addEventListener('input', filterItems);
-
-checkUI();
+// initialize app
+const init = () => {
+  // Event Listerner
+  // Add Items in List
+  itemForm.addEventListener('submit', onAddItemSubmit);
+  itemList.addEventListener('click', removeItems);
+  clearBtn.addEventListener('click', clearItems);
+  itemFilter.addEventListener('input', filterItems);
+  document.addEventListener('DOMContentLoaded', displayItems);
+  // check / update ui function
+  checkUI();
+};
+init();
