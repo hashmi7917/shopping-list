@@ -21,6 +21,20 @@ const onAddItemSubmit = (e) => {
     alert('Please add an item');
     return;
   }
+  if (isEditMode) {
+    const itemToEdit = itemList.querySelector('.edit-mode');
+
+    removeItemFromStorage(itemToEdit.textContent);
+    itemToEdit.classList.remove('edit-mode');
+    itemToEdit.remove();
+    isEditMode = false;
+  } else {
+    if (checkIfItemExists(newItem)) {
+      alert(`${newItem} already exists!`);
+      return;
+    }
+  }
+
   // create item dom element
   addItemToDom(newItem);
 
@@ -85,6 +99,11 @@ const onClickItem = (e) => {
   }
 };
 
+const checkIfItemExists = (item) => {
+  const itemsFromStorage = getItemsFromStorage();
+  return itemsFromStorage.includes(item);
+};
+
 const setItemToEdit = (item) => {
   isEditMode = true;
   itemList
@@ -144,6 +163,7 @@ const filterItems = (e) => {
 };
 
 const checkUI = () => {
+  itemInput.value = '';
   const items = itemList.querySelectorAll('li');
   if (items.length === 0) {
     clearBtn.style.display = 'none';
@@ -152,6 +172,9 @@ const checkUI = () => {
     clearBtn.style.display = 'block';
     itemFilter.style.display = 'block';
   }
+  formBtn.innerHTML = '<i class="fa-solid fa-plus"></i>  Add item';
+  formBtn.style.backgroundColor = '#333';
+  isEditMode = false;
 };
 
 // initialize app
